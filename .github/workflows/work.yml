@@ -82,12 +82,12 @@ jobs:
         run: |
           npm run build
 
-      - name: Print build output
-        if: steps.build.outcome == 'success'
-        run: |
-          echo "Build output:"
-          ls -l build
-          echo "Build completed successfully!"        
+      # - name: Print build output
+      #   if: steps.build.outcome == 'success'
+      #   run: |
+      #     echo "Build output:"
+      #     ls -l build
+      #     echo "Build completed successfully!"        
 
       - name: Print build error
         if: steps.build.outcome == 'failure'
