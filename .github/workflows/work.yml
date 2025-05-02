@@ -1,0 +1,95 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - "**"
+  pull_request:
+    branches:
+      - "**"
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Cache node modules
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint code
+        run: npm run lint
+
+      - name: Run lint and save output
+        id: lint
+        run: |
+          npm run lint | tee lint-output.txt
+
+      - name: Print lint output
+        if: steps.lint.outcome == 'success'
+        run: |
+          echo "Lint output:"
+          cat lint-output.txt
+          echo "Linting completed successfully!"
+
+      - name: Print lint error
+        if: steps.lint.outcome == 'failure'
+        run: |
+          echo "❌ Linting failed. Please fix the issues before merging."
+          cat lint-output.txt || echo "No output captured."
+
+  build:
+    needs: lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Cache node modules
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project
+        id: build
+        run: |
+          npm run build
+
+      - name: Print build output
+        if: steps.build.outcome == 'success'
+        run: |
+          echo "Build output:"
+          ls -l dist
+          echo "Build completed successfully!"
+
+      - name: Print build error
+        if: steps.build.outcome == 'failure'
+        run: |
+          echo "❌ Build failed. Please check your code or configuration."
