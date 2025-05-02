@@ -86,8 +86,8 @@ jobs:
         if: steps.build.outcome == 'success'
         run: |
           echo "Build output:"
-          ls -l dist
-          echo "Build completed successfully!"
+          ls -l build
+          echo "Build completed successfully!"        
 
       - name: Print build error
         if: steps.build.outcome == 'failure'
