@@ -8,7 +8,7 @@ export default function Home() {
   return (
     <div>
       <div>
-        <Button>I am a button</Button>
+        <Button variant={'elevated'}>I am a button</Button>
       </div>
       <div>
         <Input placeholder="I am an input" />
