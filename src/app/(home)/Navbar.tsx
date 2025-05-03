@@ -85,7 +85,7 @@ const Navbar = () => {
 
        <div className="flex lg:hidden items-center justify-center pr-2 border">
         <Button variant={'ghost'} className="border-transparent p-0 bg-white" onClick={() => setSidebarOpen(true)}>
-          <MenuIcon size={100}/>
+          <MenuIcon size={45}/>
         </Button>
        </div>
 
