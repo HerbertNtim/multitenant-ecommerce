@@ -57,6 +57,10 @@ jobs:
     needs: lint
     runs-on: ubuntu-latest
 
+    env: 
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -81,14 +85,8 @@ jobs:
         id: build
         run: |
           npm run build
-
-      # - name: Print build output
-      #   if: steps.build.outcome == 'success'
-      #   run: |
-      #     echo "Build output:"
-      #     ls -l build
-      #     echo "Build completed successfully!"        
-
+          echo "Build completed successfully!"
+      
       - name: Print build error
         if: steps.build.outcome == 'failure'
         run: |
