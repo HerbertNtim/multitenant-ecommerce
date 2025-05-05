@@ -4,7 +4,7 @@ interface SearchFiltersProps {
 
 const SearchFilters = ({data}: SearchFiltersProps) => {
   return (
-    <div>{JSON.stringify(data, null, 2)}</div>
+    <div className="px-4 lg:px-12 flex flex-col py-8 gap-4 border-b w-full">{JSON.stringify(data, null, 2)}</div>
   )
 }
 
