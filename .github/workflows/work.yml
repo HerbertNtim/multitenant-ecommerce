@@ -22,15 +22,24 @@ jobs:
           node-version: 20
 
       - name: Cache node modules
-        uses: actions/cache@v3
+        uses: actions/cache@v4
+        id: node_modules_cache
         with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
+          path: node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
 
       - name: Install dependencies
-        run: npm install
+        if: steps.node_modules_cache.outputs.cache-hit != 'true'
+        run: |
+          echo "Cache miss, installing dependencies..."
+          npm install
+
+      - name: Save node_modules
+        if: steps.node_modules_cache.outputs.cache-hit != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: node-modules
+          path: node_modules
 
       - name: Lint code
         run: npm run lint
@@ -70,22 +79,17 @@ jobs:
         with:
           node-version: 20
 
-      - name: Cache node modules
-        uses: actions/cache@v3
+      - name: Download node_modules artifact
+        uses: actions/download-artifact@v4
         with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-
-      - name: Install dependencies
-        run: npm install
+          name: node-modules
+          path: node_modules
 
       - name: Build project
         id: build
         run: |
           npm run build
-          echo "Build completed successfully!"
+          echo "✅ Build completed successfully!"
       
       - name: Print build error
         if: steps.build.outcome == 'failure'
