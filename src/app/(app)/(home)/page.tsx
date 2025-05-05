@@ -9,9 +9,16 @@ export default async function Home() {
 
   const data = await payload.find({
     collection: 'categories',
+    depth: 1,
+    where: {
+      parent: {
+        exists: true,
+      }
+    }
   })
 
-
+  console.log('data', data)
+  
   return (
     <div>
       {JSON.stringify(data)}
