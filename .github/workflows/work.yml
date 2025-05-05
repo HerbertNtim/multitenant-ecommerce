@@ -22,15 +22,24 @@ jobs:
           node-version: 20
 
       - name: Cache node modules
-        uses: actions/cache@v3
+        uses: actions/cache@v4
+        id: node_modules_cache
         with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
+          path: node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
 
       - name: Install dependencies
-        run: npm install
+        if: steps.node_modules_cache.outputs.cache-hit != 'true'
+        run: |
+          echo "Cache miss, installing dependencies..."
+          npm install
+
+      - name: Save node_modules
+        if: steps.node_modules_cache.outputs.cache-hit != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: node-modules
+          path: node_modules
 
       - name: Lint code
         run: npm run lint
@@ -57,6 +66,10 @@ jobs:
     needs: lint
     runs-on: ubuntu-latest
 
+    env: 
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -66,29 +79,29 @@ jobs:
         with:
           node-version: 20
 
-      - name: Cache node modules
-        uses: actions/cache@v3
+      - name: Restore node_modules cache
+        uses: actions/cache@v4
+        id: node_modules_cache
         with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
+            path: node_modules
+            key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
 
-      - name: Install dependencies
+      - name: Download node_modules artifact
+        if: steps.node_modules_cache.outputs.cache-hit != 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: node-modules
+          path: node_modules
+
+      - name: Run npm install to ensure all dependencies are installed
         run: npm install
 
       - name: Build project
         id: build
         run: |
           npm run build
-
-      # - name: Print build output
-      #   if: steps.build.outcome == 'success'
-      #   run: |
-      #     echo "Build output:"
-      #     ls -l build
-      #     echo "Build completed successfully!"        
-
+          echo "✅ Build completed successfully!"
+      
       - name: Print build error
         if: steps.build.outcome == 'failure'
         run: |
