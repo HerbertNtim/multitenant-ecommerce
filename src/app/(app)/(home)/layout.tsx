@@ -21,7 +21,7 @@ const HomeLayout = async ({ children }: Props) => {
     pagination: false,
     where: {
       parent: {
-        exists: true,
+        exists: false,
       }
     }
   })
